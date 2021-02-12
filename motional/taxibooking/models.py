@@ -25,7 +25,3 @@ class Car(models.Model):
 
 class Time(models.Model):
 	tick = models.IntegerField(default=0)
-
-
-c2 = Car(id=2, position_x=0, position_y=0, booking_state='FREE', customer=None)
-c3 = Car(id=3, position_x=0, position_y=0, booking_state='FREE', customer=None)

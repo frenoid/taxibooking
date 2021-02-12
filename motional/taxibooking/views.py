@@ -120,21 +120,36 @@ def find_nearest_available_car(customer: Customer, available_cars: QuerySet) -> 
 	if len(available_cars) == 0:
 		return None
 
-	nearest_car = None
-	largest_distance = 9999999999
-
+	# Find the list of cars with the lowest distance to customer
+	nearest_cars = []
+	lowest_distance = 9999999999
 	for car in available_cars:
 		distance = distance_between_two_points(
 			x1=customer.position_x,
 			x2=car.position_x,
 			y1=customer.position_y,
 			y2=car.position_y)
-		if distance < largest_distance:
-			nearest_car = car
+		if distance <= lowest_distance:
+			nearest_cars.append(car)
 
-	return nearest_car
+	# Amongst the low distance cars, find the one with the lowest ID
+	nearest_car_with_lowest_id, lowest_car_id = None, 999999999
+	for car in nearest_cars:
+		if car.id < lowest_car_id:
+			nearest_car_with_lowest_id, lowest_car_id = car, car.id
+
+	return nearest_car_with_lowest_id
 
 def reset_cars(cars: QuerySet) -> int:
+	if len(cars) != 3:
+		Cars.objects.all().delete()
+		car_1 = Car(id=1, position_x=0, position_y=0, customer=None, booking_state='FREE')
+		car_1.save()
+		car_2 = Car(id=2, position_x=0, position_y=0, customer=None, booking_state='FREE')
+		car_2.save()
+		car_3 = Car(id=3, position_x=0, position_y=0, customer=None, booking_state='FREE')
+		car_3.save()
+
 	for car in cars:
 		car.position_x, car.position_y = 0, 0
 		car.customer = None
@@ -147,6 +162,8 @@ def assign_car_to_customer(customer: Customer, car: Car) -> None:
 	car.booking_state = 'ALLO'
 	car.customer = customer
 	car.save()
+
+	print(f"car {car.id} was assigned to customer {customer.id}")
 
 	return
 
