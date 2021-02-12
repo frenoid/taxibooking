@@ -21,7 +21,6 @@ def book(source, destination, expected):
         headers=head,
         data=json.dumps(data)
     )
-
     check_car(expected, json.loads(response.content))
 
 

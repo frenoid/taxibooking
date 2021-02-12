@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.db.models.query import QuerySet
+from django.views.decorators.csrf import csrf_exempt
 from taxibooking.models import Customer, Car, Time
 import json
 
@@ -166,12 +167,13 @@ def assign_car_to_customer(customer: Customer, car: Car) -> None:
 	print(f"car {car.id} was assigned to customer {customer.id}")
 
 	return
-
+	
+@csrf_exempt
 def index(request):
 	return JsonResponse({'health_check': "OK"})
 
 
-# /api/book
+@csrf_exempt
 def book(request):
 	body = json.loads(request.body)
 	customer = Customer(position_x=int(body['source']['x']),
@@ -197,29 +199,29 @@ def book(request):
 		y2=customer.destination_y
 		)
 
-	return JsonResponse({
+	return JsonResponse(data={
 		'car_id': nearest_car.id,
 		'total_time': time_for_car_to_pickup_customer + time_from_source_to_destination
-		})
+		}, safe=True)
 
 
-# /api/tick
+@csrf_exempt
 def tick(request):
 	new_tick = advance_world(cars=Car.objects.all(),
 		customers=Customer.objects.all(),
 		current_time=Time.objects.all()[0])
 
-	return JsonResponse({'new_tick': new_tick})
+	return JsonResponse(data={'new_tick': new_tick})
 
 
-# /api/reset
+@csrf_exempt
 def reset(request):
 	cars = Car.objects.all()
 	reset_cars(cars=cars)
 
 	logging.info(f"Reset {len(cars)} cars")
 
-	return JsonResponse({
+	return JsonResponse(data={
 		'view': 'reset',
 		'cars_reset': len(cars)
 		})
