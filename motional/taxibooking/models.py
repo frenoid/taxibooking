@@ -5,6 +5,8 @@ class Customer(models.Model):
 	id = models.AutoField(primary_key=True)
 	position_x = models.IntegerField(default=0)
 	position_y = models.IntegerField(default=0)
+	destination_x = models.IntegerField(default=0)
+	destination_y = models.IntegerField(default=0)
 
 class Car(models.Model):
 	id = models.AutoField(primary_key=True)
