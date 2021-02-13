@@ -2,4 +2,24 @@
 
 ## Taxi booking system
 
-### Problem statement
+## To Run
+
+Clone the repo
+```
+git clone https://github.com/frenoid/taxibooking.git
+```
+
+Build the Docker image
+```
+docker build -t motional .
+```
+
+Run the container and expose port 8080
+```
+docker run -d -p 8080:8080 motional
+```
+
+Run the tests
+```
+python3 basic_solution_checker.py
+```
