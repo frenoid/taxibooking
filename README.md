@@ -9,7 +9,7 @@ Clone the repo
 git clone https://github.com/frenoid/taxibooking.git
 ```
 
-Build the Docker image
+
 ```
 docker build -t motional .
 ```
