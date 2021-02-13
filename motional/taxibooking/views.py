@@ -97,6 +97,7 @@ def update_car_booking_state(cars: QuerySet, customers: QuerySet) -> int:
 		elif car.booking_state == "INTR":
 			if is_car_at_customer_destination(car=car, customer=car.customer):
 				car.booking_state = "FREE"
+				car.customer = None
 				car.save()
 				print(f"car {car.id} changed from INTR to FREE")
 				state_changes += 1
@@ -167,7 +168,7 @@ def assign_car_to_customer(customer: Customer, car: Car) -> None:
 	print(f"car {car.id} was assigned to customer {customer.id}")
 
 	return
-	
+
 @csrf_exempt
 def index(request):
 	return JsonResponse({'health_check': "OK"})
