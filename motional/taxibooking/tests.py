@@ -149,8 +149,60 @@ class BookingStateTests(TestCase):
 		self.assertEqual(car_3.booking_state, "FREE")
 		self.assertEqual(car_3.customer, None)
 
+# Test get_lowest_distance(), get_cars_of_x_distance_to_customer(), get_car_of_lowest_id()
+class TestLowestDistance(TestCase):
+	def test_get_lowest_distance(self):
+		car_1 = Car(id=1, position_x=1, position_y=1, customer=None, booking_state='FREE')
+		car_2 = Car(id=2, position_x=2, position_y=2, customer=None, booking_state='FREE')
+		car_3 = Car(id=3, position_x=3, position_y=3, customer=None, booking_state='FREE')
+		car_1.save()
+		car_2.save()
+		car_3.save()
+
+		customer_1 = Customer(id=1, position_x=5, position_y=5, destination_x=1, destination_y=1)
+		customer_1.save()
+
+
+		lowest_distance = views.get_lowest_distance(customer=Customer.objects.get(id=1),
+			cars=Car.objects.all())
+		self.assertEqual(lowest_distance, 4)
+
+	def test_get_cars_of_x_distance_to_customer(self):
+		x_distance = 4
+		car_1 = Car(id=1, position_x=1, position_y=1, customer=None, booking_state='FREE')
+		car_2 = Car(id=2, position_x=2, position_y=2, customer=None, booking_state='FREE')
+		car_3 = Car(id=3, position_x=3, position_y=3, customer=None, booking_state='FREE')
+		car_1.save()
+		car_2.save()
+		car_3.save()
+
+		customer_1 = Customer(id=1, position_x=5, position_y=5, destination_x=1, destination_y=1)
+		customer_1.save()
+
+		cars_of_x_distance = views.get_cars_of_x_distance_to_customer(x_distance=x_distance,
+			customer=Customer.objects.get(id=1),
+			cars=Car.objects.all())
+
+		self.assertEqual(len(cars_of_x_distance), 1)
+		self.assertEqual(cars_of_x_distance[0].id, 3)
+
+
+	def test_get_car_of_lowest_id(self):
+		car_1 = Car(id=1, position_x=1, position_y=1, customer=None, booking_state='FREE')
+		car_2 = Car(id=2, position_x=2, position_y=2, customer=None, booking_state='FREE')
+		car_3 = Car(id=3, position_x=3, position_y=3, customer=None, booking_state='FREE')
+		car_1.save()
+		car_2.save()
+		car_3.save()
+
+		lowest_id_car = views.get_car_of_lowest_id(cars=Car.objects.all())
+
+		self.assertEqual(lowest_id_car.id ,1)
+
+
+
 # Test find_nearest_available_car()
-class TestNearestAvailableCar():
+class TestNearestAvailableCar(TestCase):
 	def test_find_nearest_available_car_1(self):
 		car_1 = Car(id=1, position_x=0, position_y=0, customer=None, booking_state='FREE')
 		car_2 = Car(id=2, position_x=0, position_y=0, customer=None, booking_state='FREE')
@@ -165,7 +217,7 @@ class TestNearestAvailableCar():
 		lowest_id_available_car = views.find_nearest_available_car(customer=Customer.objects.get(id=1),
 			available_cars=Car.objects.filter(booking_state='FREE'))
 
-		assertEqual(lowest_id_available_car, 1)
+		self.assertEqual(lowest_id_available_car.id, 1)
 
 	def test_find_nearest_available_car_2(self):
 		car_1 = Car(id=1, position_x=1, position_y=1, customer=None, booking_state='FREE')
@@ -175,13 +227,13 @@ class TestNearestAvailableCar():
 		car_2.save()
 		car_3.save()
 
-		customer_1 = Customer(id=1, position_x=4, position_y=4, destination_x=1, destination_y=1)
+		customer_1 = Customer(id=1, position_x=4, position_y=4, destination_x=9, destination_y=9)
 		customer_1.save()
 
 		lowest_id_available_car = views.find_nearest_available_car(customer=Customer.objects.get(id=1),
 			available_cars=Car.objects.filter(booking_state='FREE'))
 
-		assertEqual(lowest_id_available_car, 3)
+		self.assertEqual(lowest_id_available_car.id, 3)
 
 
 # Test reset_cars()
@@ -208,6 +260,23 @@ class ResetCarsTests(TestCase):
 		self.assertEqual(car_3.booking_state, "FREE")
 		self.assertEqual(car_3.customer, None)
 
+
+# Test assign_car_to_customer
+class AssignCarTests(TestCase):
+	def test_assign_car_to_customer(self):
+		car_1 = Car(id=1, position_x=0, position_y=0, customer=None, booking_state='FREE')
+		car_1.save()
+
+		customer_1 = Customer(id=1, position_x=4, position_y=4, destination_x=1, destination_y=1)
+		customer_1.save()
+
+		car = Car.objects.get(id=1)
+		customer = Customer.objects.get(id=1)
+		views.assign_car_to_customer(customer=customer, car=car)
+
+		car = Car.objects.get(id=1)
+		self.assertEqual(car.booking_state, 'ALLO')
+		self.assertEqual(car.customer, customer)
 
 
 

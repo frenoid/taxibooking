@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.db.models.query import QuerySet
 from django.views.decorators.csrf import csrf_exempt
 from taxibooking.models import Customer, Car, Time
+from typing import List
 import json
 
 import logging
@@ -118,29 +119,56 @@ def advance_world(cars: QuerySet, customers: QuerySet, current_time: Time) -> in
 
 	return current_time.tick 
 
-def find_nearest_available_car(customer: Customer, available_cars: QuerySet) -> Car:
-	if len(available_cars) == 0:
-		return None
+def get_lowest_distance(customer: Customer, cars: QuerySet) ->  int:
+	distances = []
 
-	# Find the list of cars with the lowest distance to customer
-	nearest_cars = []
-	lowest_distance = 9999999999
-	for car in available_cars:
+	for car in cars:
 		distance = distance_between_two_points(
 			x1=customer.position_x,
 			x2=car.position_x,
 			y1=customer.position_y,
 			y2=car.position_y)
-		if distance <= lowest_distance:
-			nearest_cars.append(car)
+		distances.append(distance)
 
-	# Amongst the low distance cars, find the one with the lowest ID
+	distances.sort()
+
+	return distances[0]
+
+
+def get_cars_of_x_distance_to_customer(x_distance: int, customer: Customer, cars: QuerySet) -> List[Car]:
+	x_distance_cars = []
+
+	for car in cars:
+		distance_of_car_from_customer = distance_between_two_points(
+			x1=customer.position_x,
+			x2=car.position_x,
+			y1=customer.position_y,
+			y2=car.position_y)
+		if distance_of_car_from_customer == x_distance:
+			x_distance_cars.append(car)
+
+	return x_distance_cars
+
+def get_car_of_lowest_id(cars: QuerySet) -> Car:
 	nearest_car_with_lowest_id, lowest_car_id = None, 999999999
-	for car in nearest_cars:
+	for car in cars:
 		if car.id < lowest_car_id:
 			nearest_car_with_lowest_id, lowest_car_id = car, car.id
 
 	return nearest_car_with_lowest_id
+
+
+def find_nearest_available_car(customer: Customer, available_cars: QuerySet) -> Car:
+	if len(available_cars) == 0:
+		return None
+
+	# Find the list of cars with the lowest distance to customer
+	lowest_distance = get_lowest_distance(customer=customer, cars=available_cars)
+	nearest_cars = get_cars_of_x_distance_to_customer(x_distance=lowest_distance, customer=customer, cars=available_cars)
+	nearest_car_of_lowest_id = get_car_of_lowest_id(cars=nearest_cars)
+
+	return nearest_car_of_lowest_id
+
 
 def reset_cars(cars: QuerySet) -> int:
 	if len(cars) != 3:
