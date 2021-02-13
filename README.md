@@ -38,3 +38,7 @@ This "batteries-included" framework allowed me to develop the taxibooking app wi
 There is also 100% test coverage of motional/taxibooking/views.py. See motional/taxibooking/tests.py
 
 motional/taxibooking/models.py provides a list of models used.
+
+This app has been dockerized (See ./Dockerfile). 
+
+You can use ./entrypoint.sh to build and run the app
