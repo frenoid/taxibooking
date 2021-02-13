@@ -38,6 +38,42 @@ class CustomerCarTests(TestCase):
 		customer_1 = Customer(id=1, position_x=0, position_y=0, destination_x=3, destination_y=3)
 		self.assertFalse(views.is_car_at_customer_destination(customer=customer_1,car=car_1))
 
+class CarMovementTests(TestCase):
+	def test_move_car_towards_1(self):
+		car_1 = Car(id=1, position_x=0, position_y=0, customer=None, booking_state='Free')
+		did_move = views.move_car_towards(car=car_1, target_x=2, target_y=2)
+		self.assertTrue(did_move)
+		self.assertEqual(car_1.position_x, 1)
+		self.assertEqual(car_1.position_y, 0)
+
+	def test_move_car_towards_2(self):
+		car_2 = Car(id=2, position_x=0, position_y=0, customer=None, booking_state='Free')
+		did_move = views.move_car_towards(car=car_2, target_x=0, target_y=2)
+		self.assertTrue(did_move)
+		self.assertEqual(car_2.position_x, 0)
+		self.assertEqual(car_2.position_y, 1)
+
+	def test_move_car_towards_3(self):
+		car_3 = Car(id=3, position_x=0, position_y=0, customer=None, booking_state='Free')
+		did_move = views.move_car_towards(car=car_3, target_x=-4, target_y=0)
+		self.assertTrue(did_move)
+		self.assertEqual(car_3.position_x, -1)
+		self.assertEqual(car_3.position_y, 0)
+
+	def test_move_car_towards_4(self):
+		car_4 = Car(id=4, position_x=0, position_y=0, customer=None, booking_state='Free')
+		did_move = views.move_car_towards(car=car_4, target_x=0, target_y=-4)
+		self.assertTrue(did_move)
+		self.assertEqual(car_4.position_x, 0)
+		self.assertEqual(car_4.position_y, -1)
+
+	def test_move_car_towards_5(self):
+		car_5 = Car(id=5, position_x=0, position_y=0, customer=None, booking_state='Free')
+		did_move = views.move_car_towards(car=car_5, target_x=0, target_y=0)
+		self.assertFalse(did_move)
+		self.assertEqual(car_5.position_x, 0)
+		self.assertEqual(car_5.position_y, 0)
+
 
 
 
