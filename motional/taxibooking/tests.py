@@ -2,8 +2,11 @@ from django.test import TestCase
 from taxibooking.models import Car, Customer, Time
 from . import views
 
-# Test views.distance_between_two_points()
+ 
 class DistanceTests(TestCase):
+	"""
+	Test views.distance_between_two_points()
+	"""
 	def test_distance_between_two_points_1(self):
 		self.assertEqual(views.distance_between_two_points(
 			x1=0,x2=3,y1=0,y2=3), 6)
@@ -17,8 +20,11 @@ class DistanceTests(TestCase):
 			x1=0,x2=-3,y1=0,y2=-3), 6)
 
 
-# Test views.is_customer_and_car_colocated()
+
 class CustomerCarTests(TestCase):
+	"""
+	Test views.is_customer_and_car_colocated()
+	"""
 	def test_is_customer_and_car_colocated_1(self):
 		car_2 = Car(id=2, position_x=2, position_y=2, customer=None, booking_state='FREE')
 		customer_2 = Customer(id=2, position_x=2, position_y=2, destination_x=5, destination_y=9)
@@ -40,8 +46,10 @@ class CustomerCarTests(TestCase):
 		self.assertFalse(views.is_car_at_customer_destination(customer=customer_1,car=car_1))
 
 
-# Test views.move_car_towards()
 class CarMovementTests(TestCase):
+	"""
+	Test views.move_car_towards()
+	"""
 	def test_move_car_towards_1(self):
 		car_1 = Car(id=1, position_x=0, position_y=0, customer=None, booking_state='FREE')
 		did_move = views.move_car_towards(car=car_1, target_x=2, target_y=2)
@@ -77,8 +85,11 @@ class CarMovementTests(TestCase):
 		self.assertEqual(car_5.position_x, 0)
 		self.assertEqual(car_5.position_y, 0)
 
-# Test move_cars()
+
 class MoveCarsTests(TestCase):
+	"""
+	Test move_cars()
+	"""
 	def test_move_cars_1(self):
 		customer_1 = Customer(id=1, position_x=4, position_y=4, destination_x=8, destination_y=8)
 		customer_2 = Customer(id=2, position_x=3, position_y=3, destination_x=5, destination_y=-9)
@@ -113,8 +124,11 @@ class MoveCarsTests(TestCase):
 		self.assertEqual(car_3.position_y, 4)
 
 
-# Test update_car_booking_state()
+
 class BookingStateTests(TestCase):
+	"""
+	Test update_car_booking_state()
+	"""
 	def test_update_car_booking_state(self):
 		customer_1 = Customer(id=1, position_x=4, position_y=4, destination_x=8, destination_y=8)
 		customer_2 = Customer(id=2, position_x=3, position_y=3, destination_x=5, destination_y=-9)
@@ -149,8 +163,65 @@ class BookingStateTests(TestCase):
 		self.assertEqual(car_3.booking_state, "FREE")
 		self.assertEqual(car_3.customer, None)
 
-# Test get_lowest_distance(), get_cars_of_x_distance_to_customer(), get_car_of_lowest_id()
+ 
+class AdvanceWorldTests(TestCase):
+	"""
+	Test advance_world()
+	"""
+	def test_advance_world(self):
+		customer_1 = Customer(id=1, position_x=5, position_y=5, destination_x=-1, destination_y=-1)
+		customer_2 = Customer(id=1, position_x=4, position_y=4, destination_x=3, destination_y=3)
+		customer_1.save()
+		customer_2.save()
+
+
+		car_1 = Car(id=1, position_x=1, position_y=1, customer=None, booking_state='FREE')
+		car_2 = Car(id=2, position_x=2, position_y=2, customer=customer_1, booking_state='ALLO')
+		car_3 = Car(id=3, position_x=2, position_y=3, customer=customer_2, booking_state='INTR')
+		car_1.save()
+		car_2.save()
+		car_3.save()
+
+		time = Time(tick=0)
+		time.save()
+
+		new_tick = views.advance_world(cars=Car.objects.all(),
+			customers=Customer.objects.all(),
+			current_time=Time.objects.get(id=1))
+
+		# Check positions of cars 1,2,3
+		# car_1 does not move
+		# booking_state remains in FREE
+		car_1 = Car.objects.get(id=1)
+		self.assertEqual(car_1.position_x, 1)
+		self.assertEqual(car_1.position_y, 1)
+		self.assertEqual(car_1.customer, None)
+		self.assertEqual(car_1.booking_state, 'FREE')
+		# car_2 moved 1 right to towards customer_1 source 
+		# booking_state remains ALLO  
+		car_2 = Car.objects.get(id=2)
+		self.assertEqual(car_2.position_x, 3)
+		self.assertEqual(car_2.position_y, 2)
+		self.assertEqual(car_2.customer, customer_1)
+		self.assertEqual(car_2.booking_state, 'ALLO')
+		# car_3 moved 1 right to drop off customer_2 at destination 
+		# booking_state changes from INTR to FREE
+		car_3 = Car.objects.get(id=3)
+		self.assertEqual(car_3.position_x, 3)
+		self.assertEqual(car_3.position_y, 3)
+		self.assertEqual(car_3.customer, None)
+		self.assertEqual(car_3.booking_state, 'FREE')
+
+		# Check that tick is incremented
+		self.assertEqual(new_tick, 1)
+
+
+
+
 class TestLowestDistance(TestCase):
+	"""
+	Test get_lowest_distance(), get_cars_of_x_distance_to_customer(), get_car_of_lowest_id()
+	"""
 	def test_get_lowest_distance(self):
 		car_1 = Car(id=1, position_x=1, position_y=1, customer=None, booking_state='FREE')
 		car_2 = Car(id=2, position_x=2, position_y=2, customer=None, booking_state='FREE')
@@ -200,9 +271,10 @@ class TestLowestDistance(TestCase):
 		self.assertEqual(lowest_id_car.id ,1)
 
 
-
-# Test find_nearest_available_car()
 class TestNearestAvailableCar(TestCase):
+	"""
+	Test find_nearest_available_car()
+	"""
 	def test_find_nearest_available_car_1(self):
 		car_1 = Car(id=1, position_x=0, position_y=0, customer=None, booking_state='FREE')
 		car_2 = Car(id=2, position_x=0, position_y=0, customer=None, booking_state='FREE')
@@ -236,8 +308,10 @@ class TestNearestAvailableCar(TestCase):
 		self.assertEqual(lowest_id_available_car.id, 3)
 
 
-# Test reset_cars()
 class ResetCarsTests(TestCase):
+	"""
+	Test reset_cars()
+	"""
 	def test_reset_cars(self):
 		car_1 = Car(id=1, position_x=0, position_y=0, customer=None, booking_state='FREE')
 		car_2 = Car(id=2, position_x=4, position_y=4, customer=None, booking_state='ALLO')
@@ -260,9 +334,11 @@ class ResetCarsTests(TestCase):
 		self.assertEqual(car_3.booking_state, "FREE")
 		self.assertEqual(car_3.customer, None)
 
-
-# Test assign_car_to_customer
+ 
 class AssignCarTests(TestCase):
+	"""
+	Test assign_car_to_customer
+	"""
 	def test_assign_car_to_customer(self):
 		car_1 = Car(id=1, position_x=0, position_y=0, customer=None, booking_state='FREE')
 		car_1.save()

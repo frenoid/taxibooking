@@ -9,17 +9,18 @@ Clone the repo
 git clone https://github.com/frenoid/taxibooking.git
 ```
 
-
+You can run unit tests I wrote myself
 ```
-docker build -t motional .
-```
-
-Run the container and expose port 8080
-```
-docker run -d -p 8080:8080 motional
+python3 motional/manage.py test taxibooking
 ```
 
-Run the tests
+To start the server, run the entrypoint.sh script. 
+This builds and docker image and runs the webserver on port 808
+```
+source entrypoint.sh
+```
+
+Run the tests provided by Motional
 ```
 python3 basic_solution_checker.py
 ```
